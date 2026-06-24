@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>零信任个人隐私保险柜 (Zero-Trust Vault)</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="crypto-engine.js"></script>
+    <script src="security-check.js"></script>
+    <script src="device-fingerprint.js"></script>
+    <script src="logger.js"></script>
+    <script src="main.js"></script>
+</head>
+<body>
+
+    <header class="top-bar">
+        <div class="logo">
+            <span class="icon">🛡️</span>
+            <h1>Zero-Trust Vault</h1>
+        </div>
+        <div class="status-panel">
+            <div id="env-status" class="status-badge checking">正在扫描环境指纹...</div>
+        </div>
+    </header>
+
+    <main class="container">
+
+        <section class="control-panel">
+            
+            <div class="card box-encrypt">
+                <h2><span class="icon">🔒</span> 数据封存 (Encrypt)</h2>
+                <p class="hint">输入您的机密信息并设置主密码，将数据封入保险柜。</p>
+                <div class="input-group">
+                    <label>机密内容：</label>
+                    <textarea id="plain-text" placeholder="例如：我的比特币助记词是..."></textarea>
+                </div>
+                <div class="input-group">
+                    <label>主控密码：</label>
+                    <input type="password" id="encrypt-pwd" placeholder="设置高强度密码">
+                </div>
+                <div class="input-group recovery-group">
+                    <label>恢复密钥 <span class="optional-tag">(可选, 用于跨设备解密)</span>：</label>
+                    <input type="password" id="encrypt-recovery-pwd" placeholder="设置恢复密钥，换设备解密时需要用到">
+                </div>
+                <button id="btn-encrypt" class="btn primary-btn">执行高强度封存</button>
+                <div class="output-group">
+                    <label>封存结果 (Base64)：</label>
+                    <textarea id="cipher-output" readonly placeholder="加密后的乱码将显示在这里..."></textarea>
+                </div>
+                <div id="recovery-hint" class="recovery-hint" style="display:none;">
+                    ⚠ 请妥善保管恢复密钥！换设备解密时必须提供。
+                </div>
+            </div>
+
+            <div class="card box-decrypt">
+                <h2><span class="icon">🔓</span> 数据提取 (Decrypt)</h2>
+                <p class="hint">验证环境并核对主密码后，方可提取保险柜内容。</p>
+                <div class="input-group">
+                    <label>待解密密文：</label>
+                    <textarea id="cipher-input" placeholder="贴入由本系统生成的密文..."></textarea>
+                </div>
+                <div class="input-group">
+                    <label>主控密码：</label>
+                    <input type="password" id="decrypt-pwd" placeholder="输入密码进行核验">
+                </div>
+                <div class="input-group recovery-group" id="recovery-decrypt-group" style="display:none;">
+                    <label>恢复密钥 <span class="warning-tag">(当前设备未授权，必须填写)</span>：</label>
+                    <input type="password" id="decrypt-recovery-pwd" placeholder="输入加密时设置的恢复密钥">
+                </div>
+                <button id="btn-decrypt" class="btn secondary-btn">验证身份并提取</button>
+                <div class="output-group">
+                    <label>解密明文：</label>
+                    <textarea id="plain-output" readonly placeholder="如果环境安全且密码正确，明文将在此呈现..."></textarea>
+                </div>
+                <div id="burn-timer" class="burn-timer" style="display:none;">
+                    <div class="burn-timer-inner">
+                        <span class="burn-icon">⏳</span>
+                        <span class="burn-text">请尽快截图或复制，明文将在</span>
+                        <span id="burn-countdown" class="burn-countdown">30</span>
+                        <span class="burn-text">秒后自动销毁</span>
+                    </div>
+                    <div class="burn-progress-bar">
+                        <div id="burn-progress-fill" class="burn-progress-fill"></div>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <section class="sidebar">
+
+            <div class="card box-fingerprint">
+                <h2><span class="icon">🧬</span> 设备基因 (Fingerprint)</h2>
+                <p class="hint">零信任机制：仅允许在生成数据的原生设备上解密。</p>
+                <div class="fingerprint-data">
+                    <div class="data-item">
+                        <span>浏览器内核:</span>
+                        <span id="fp-browser">读取中...</span>
+                    </div>
+                    <div class="data-item">
+                        <span>屏幕视口:</span>
+                        <span id="fp-screen">读取中...</span>
+                    </div>
+                    <div class="data-item">
+                        <span>生成哈希锁:</span>
+                        <span id="fp-hash" class="hash-text">计算中...</span>
+                    </div>
+                </div>
+                <div class="attack-sim">
+                    <button id="btn-simulate-attack" class="btn danger-btn">💥 模拟设备遭劫持 (改变环境)</button>
+                </div>
+            </div>
+
+            <div class="card box-audit">
+                <h2><span class="icon">📜</span> 审计黑匣子 (Audit Log)</h2>
+                <div id="audit-log" class="terminal-log">
+                    <p class="log-entry system">[SYSTEM] 初始化零信任安全核心...</p>
+                </div>
+                <button id="btn-clear-log" class="text-btn">清空审计日志</button>
+            </div>
+
+        </section>
+    </main>
+
+    </body>
+</html>
